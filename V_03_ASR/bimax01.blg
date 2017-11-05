@@ -1,0 +1,64 @@
+This is BibTeX, Version 0.99d (TeX Live 2017)
+Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
+The top-level auxiliary file: bimax01.aux
+The style file: IEEEtran.bst
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Database file #1: bibliografia.bib
+-- IEEEtran.bst version 1.14 (2015/08/26) by Michael Shell.
+-- http://www.michaelshell.org/tex/ieeetran/bibtex/
+-- See the "IEEEtran_bst_HOWTO.pdf" manual for usage information.
+Too many commas in name 1 of "Wei Shen, Cheng Jun Xie, Gui Xia Liu, Chong Xing, Ming Qian Wang, You Zhou" for entry WeiShen2011
+while executing---line 2403 of file IEEEtran.bst
+Too many commas in name 1 of "Wei Shen, Cheng Jun Xie, Gui Xia Liu, Chong Xing, Ming Qian Wang, You Zhou" for entry WeiShen2011
+while executing---line 2403 of file IEEEtran.bst
+Too many commas in name 1 of "Wei Shen, Cheng Jun Xie, Gui Xia Liu, Chong Xing, Ming Qian Wang, You Zhou" for entry WeiShen2011
+while executing---line 2403 of file IEEEtran.bst
+Warning--empty year in WeiShen2011
+
+Done.
+You've used 30 entries,
+            4087 wiz_defined-function locations,
+            1021 strings with 13804 characters,
+and the built_in function-call counts, 21520 in all, are:
+= -- 1896
+> -- 288
+< -- 217
++ -- 171
+- -- 33
+* -- 970
+:= -- 3415
+add.period$ -- 64
+call.type$ -- 30
+change.case$ -- 28
+chr.to.int$ -- 465
+cite$ -- 31
+duplicate$ -- 1566
+empty$ -- 1697
+format.name$ -- 34
+if$ -- 5019
+int.to.chr$ -- 0
+int.to.str$ -- 30
+missing$ -- 228
+newline$ -- 117
+num.names$ -- 30
+pop$ -- 421
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 2
+skip$ -- 1738
+stack$ -- 0
+substring$ -- 1150
+swap$ -- 1307
+text.length$ -- 62
+text.prefix$ -- 0
+top$ -- 5
+type$ -- 30
+warning$ -- 1
+while$ -- 115
+width$ -- 32
+write$ -- 327
+(There were 3 error messages)

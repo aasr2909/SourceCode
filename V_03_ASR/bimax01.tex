@@ -1,0 +1,310 @@
+\documentclass[a4paper,conference]{IEEEtran}
+\usepackage{balance}
+\usepackage{blindtext}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{amssymb, amsfonts, amsmath}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{listings}
+\usepackage{subfig}
+\usepackage{cite}
+
+\renewcommand{\abstractname}{Abstract} 
+\newtheorem{defn}{Definition}[section]
+
+\begin{document}
+
+\title{Bimax (and something else)}
+\author{
+\IEEEauthorblockN{Ang\'elica Alejandra~Serrano-Rubio, \\ Am\'\i lcar Meneses and Guillermo Morales-Luna} 
+\IEEEauthorblockA{Computer Science Department \\
+CINVESTAV-IPN, Mexico City, Mexico\\
+Email: aserrano@computacion.cs.cinvestav.mx, \\ \{ameneses,gmorales\}@cs.cinvestav.mx}
+\and
+\IEEEauthorblockN{Mireya Paredes L\'opez} 
+\IEEEauthorblockA{Mathematics Department \\
+CINVESTAV-IPN, Mexico City, Mexico\\
+Email: mireya.paredes@gmail.com}
+}
+
+\maketitle
+
+\renewcommand{\abstractname}{Abstract}
+\begin{abstract}
+Differential gene expression analysis and clustering techniques have been current tools to study the relation between a gene and biological processes. Since a group of genes may show co-expression under certain conditions, biclustering techniques have been used to find sets of genes sharing similar expression patterns. We propose a methodology for optimizing the performance of the BIMAX biclustering algorithm using parallel programming techniques. Its performance is evaluated using synthetic datasets. 
+\end{abstract}
+
+\begin{IEEEkeywords}
+Biclustering, Clustering, Gene expression, High-Performance Computing, Parallelism
+\end{IEEEkeywords}
+\IEEEpeerreviewmaketitle
+
+\section{Introduction}
+\IEEEPARstart{D}{ata} Mining is useful in the analysis of data structures provided in massive quantities by sophisticated new processing technologies. Bioinformatics focuses on the research and development of new computational methodologies based on computer techniques for organization and analysis of information associated with the  ``omics'' sciences~\cite{luscombe2001bioinformatics}. The organization and analysis of biological data at the level of DNA sequence and RNA generate information related to cellular mechanisms and processes~\cite{mount2004sequence}. One of the main aims is the analysis of gene expression~\cite{griffiths2003genetica}.
+
+Hybridization-based techniques or \textit{microarrays} in gene expression analysis has achieved high performance in quantifying the level of gene expression.  However, such analysis is performed using hypothesis tests, which require a relatively small number of conditions and only genes that have been selected can be parsed.
+
+\textit{Clustering} describes patterns classifying the information by unsupervised methods. \textit{Biclustering} techniques allow the clustering of genes with a similar genetic profile in experimental conditions, thus overcoming the traditional clustering techniques by the simultaneous clustering of genes, diseases and overlap.
+
+In this paper we focus on BIMAX, described by Preli\'c \textit{et al.}~\cite{prelic2006systematic}, based on \textit{Divide-and-Conquer} strategies to determine optimal biclusters in reasonable time.
+
+In general, biclustering techniques face the same problem as the clustering techniques proposed in the literature, due to the type of information being analyzed, which is characterized by high-dimensional databases. Consequently, robust noise algorithms must be proposed minimizing runtime and showing high-quality solutions. A high-performance computing system is essential to improve the performance of any computational algorithm. We describe the implementation of the parallel BIMAX algorithm. Section~\ref{sc.2} describes the background, and Section~\ref{sc.4} presents BIMAX algorithm.
+
+\section{Background} \label{sc.2}
+
+The main application of Bioinformatics within the biological context is the use of Data Mining techniques for the analysis of information obtained in the study of molecules relevant for life~\cite{perezleo2003impacto}. However, before the application of computational algorithms, it is necessary to adapt and elaborate new models and methodologies that fit the demand of the problem under study~\cite{pontes2007evaluacion,  rossi2006handbook}.
+
+Techniques of clustering and biclustering allow to perform transcriptome analysis for the detection of genes differentially expressed in a set of experimental conditions. The patterns can be identified from datasets through \textit{microarray} experiments, aiming to infer the biological mechanisms modeling the genotype-phenotype relationship and support decision-making. The information from microarray analysis is organized in a  \textit{Gene Expression Matrix} 
+\begin{equation}
+W_{m,n} =
+ \begin{pmatrix}
+  w_{11} & w_{12} & \cdots & w_{1n} \\
+  w_{21} & w_{22} & \cdots & w_{2n} \\
+  \vdots  & \vdots  & \ddots & \vdots  \\
+  w_{m1} & w_{m2} & \cdots & w_{mn}
+ \end{pmatrix}.
+ \label{eq.gem}
+\end{equation}
+The $i$-th row contains data of a specific gene $g_i$ while the $j$-th column represents a experimental condition $c_j$. Let $G=\{g_1, g_2, \cdots, g_n\}$ and $C=\{c_1, c_2, \cdots, c_m\}$ be the collections of genes and conditions, respectively. For each $i,j$, the value $w_{ij}$ represents the expression level of gene $i$ at condition $j$.
+
+The \textit{gene expression matrix} may contain noise, null values and systemic variations produced during the execution of the experiments. Usually, there are much more genes than conditions. Pre-processing of data is essential before applying any bioinformatic analysis technique, to form hypotheses about the potential pathways of information flow between the involved genes.
+
+\subsection{Clustering techniques}
+
+Clustering techniques aim to group data containing common characteristics, they identify densely populated regions called \textit{clusters}, namely, a partition ${\cal U} = \{U_1, U_2, \cdots, U_k \} $ of an universe $U$ is built.
+
+\textit{Gene-based-clustering} obtains functional relations between genes based on their expression levels in comparison with experimental conditions. Such relations consider genes as the data to be grouped and the states as attributes. 
+
+Instead, \textit{sample-based-clustering}~\cite{golub1999molecular} matches each group of experiments with a phenotype.
+
+A good clustering solution must consider the maximization of homogeneity and separation metrics, which act oppositely. There are many proposals to solve grouping problems, and most of them are NP-hard. Thus heuristics and approximations are used. Five clustering algorithms and their characteristics are summarized in Table~\ref{Clustering_alg}.
+
+\begin{table}[!h]
+\renewcommand{\arraystretch}{1.5}
+\caption{Clustering algorithms}
+\label{Clustering_alg}
+\centering
+\begin{tabular}{p{2cm}|p{5.4cm}|p{0.3cm}} 
+\hline
+\bfseries Algorithm & \bfseries Description & Ref. \\
+\hline
+K-means & Method of vector quantization whose objective is to classify $n$ observations into $k$ clusters. The time complexity is $O(lkn)$ where $l$ is the number of iterations, and $k$ is the number of clusters. &~\cite{levine2015data} \\
+\hline
+Self Organizing Maps & Algorithm based on competitive learning without supervision to classify a set of nearby observations through a graph. In some cases, it may fail because interesting patterns can be classified in several ways~\cite{k2015analysis} &~\cite{tamayo1999interpreting}. \\
+\hline
+CAST & Algorithm based on the notion of \textit{corrupted clique graph} data model. The input data set is assumed to come from the underlying cluster structure with ``contamination'' due to random errors caused by the complex process of gene expression measurement. &~\cite{bellaachia2002cast}\\
+\hline
+CLICK & Algorithm to identify highly connected components in the proximity graph as clusters using probabilistic assumptions so that two criteria are satisfied: \textit{homogeneity}, due to mates: highly similar to each other; and \textit{separation} due to non-mates: little similarity to each other. &~\cite{conesa2016survey} \\
+\hline
+Hierarchical Clustering & This algorithm generates a hierarchical series of nested clusters which can be graphically represented by a tree named dendrogram. &~\cite{galili2015dendextend} \\
+\hline
+\end{tabular}
+\end{table}
+
+Advantages and lacks appear at clustering algorithms when identifying highly correlated gene sets in gene expression. K-means, SOM, and hierarchical clustering have shown high-performance~\cite{weber2016comparison} but their purpose is general and they may fail to address particular challenges of gene expression analysis.
+On the other hand, CLICK and CAST may solve this problem~\cite{salazar2016gene}.  
+%In summary, clustering analysis provides an abstraction from individual data objects (genes or experimental conditions) to the clusters in which such data objects are located (\textit{gene expression matrix}).  
+
+\subsection{Biclustering techniques}
+
+A gene expression matrix $W_{m,n}$ as in eq.~(\ref{eq.gem}) can be seen as indexed by the set $G\times C$ where $G=\{g_1, g_2, \cdots, g_n\}$ and $C=\{c_1, c_2, \cdots, c_m\}$ are the sets of considered genes and conditions, respectively. The $ij$-th value $w_{ij}$ represents the expression level of gene $i$ at condition $j$. Accordingly, we will write from now on $W_{GC}$ instead of the previously introduced notation $W_{m,n}$.
+
+For any subsets $F\subseteq G$ and $B\subseteq C$, the submatrix $W_{FB} = \left(w_{ij}\right)_{i\in F,j\in B}$ consists of the expression levels corresponding to genes in $F$ under conditions in $B$, and can be seen as the gene expression matrix of the {\em bicluster} $F\times B$ (in the cases in which $F=G$ or $B=C$ it is conventional to refer to {\em clusters} instead of {\em biclusters}). A bicluster may satisfy a {\em homogeneity property}, e.g. it may have constant entries, or constant entries by rows or columns, or have {\em additive or multiplicative coherent values} or {\em coherent evolutions}, etc.
+
+The {\em Biclustering Problem} (BP) receives as input a gene expression matrix $W_{GC}$ and a collection ${\cal H}$ of homogeneity properties and the goal is to find a covering of $G\times C$ consisting of maximal biclusters $\left(F_{\iota}\times B_{\iota}\right)_{\iota\in I}$ such that $W_{GC} = \bigcup_{\iota\in I} W_{F_{\iota}B_{\iota}}$ and each bicluster $W_{F_{\iota}B_{\iota}}$ satisfies a homogeneity property.
+
+The BP can be hardened by requiring that the cover solution is indeed a partition. Namely, its sets are pairwise disjoint.
+
+BP, in general, is \textit{NP-complete}~\cite{pontes2015biclustering}, hence the vast majority of algorithms prioritize the reduction of computing costs, opting for the use of heuristic, stochastic search, divide and conquer and pre-processing techniques to make the patterns of interest more evident.
+
+Most biclustering techniques are used for the analysis of transcriptomic data. The choice of an algorithm will implicitly favor getting a particular type of grouping. Five biclustering algorithms have been selected. Table~\ref{Biclustering_alg} gives a brief description of them. 
+
+\begin{table}[!h]
+\renewcommand{\arraystretch}{1.5}
+\caption{Biclustering algorithms}
+\label{Biclustering_alg}
+\centering
+\begin{tabular}{p{2cm}|p{5.4cm}|p{0.3cm}} 
+\hline
+\bfseries Algorithm & \bfseries Description & Ref. \\
+\hline
+Cheng \& Church & This algorithm is the first application of biclustering for analysis of expression profile, and the aim is to find more delicate signals than the clustering algorithm using the Mean Residue Score.  &~\cite{cheng2000biclustering} \\
+\hline
+SAMBA & SAMBA emerged as a method of biclustering that produced statistically significant results, and that will also involve a normalization of the expression matrix that represents the essential characteristics of the data. &~\cite{fiannaca2015analysis}  \\
+\hline
+CTWC & The idea of this algorithm is to identify subsets of genes and conditions so that some of these subsets are used to define new groups that define stable and significant partitions. It should note that the number of submatrices grows exponentially with the size of the problem. &~\cite{wani2017novel}\\
+\hline
+Plaid Models & This algorithm considers a matrix of genes and conditions as a layer superposition, each of them being a subset of rows and columns, which are rearranged to obtain a matrix formed by blocks, where each block is a bicluster &~\cite{oghabian2014biclustering} \\
+\hline
+BIMAX & This algorithm is based on the technique of ``\textit{divide and conquer}''. Specifically, the algorithm begins with a division of the matrix $ W_{m\times n} $ into sets of columns based on one of the rows as the reference. Next, the rows or genes rearranged, as they correspond to the different sets of conditions previously obtained. &~\cite{roy2016analysis} \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Related work}\label{sc.rw}
+
+Improving the computational efficiency of Data Mining algorithms by introducing some method of Parallel Computation proves to be significant as the dimension of the datasets to be analyzed increases. In this sense, several robust parallel methodologies have been proposed that model a biological model under study and also support decision making efficiently.
+
+Metaheuristics are techniques that help in the solution of combinatorial optimization problems. In~\cite{gomez2016fine} Gomez-Pulido \textit{et al.} propose the parallelization based on a fine granularity scheme of a biclustering algorithm based on EAs. The methodology indicates the selection of the section that takes the longest computation time, then copies of the implementation will be processed in different processing units. The results showed high efficiency in computing time and power consumption when using reconfigurable hardware instead of multiprocessor architectures.
+
+Lin \textit{et al}. proposed the parallelization of the biclustering algorithm: Large Average Submatrices (LAS) based on the MapReduce technique. Intuitively, the algorithm is organized in two phases: 1) search $k$ rows with the largest sum over the columns, this phase consists of a function \textit{map} and two functions \textit{reduce}; and 2) based on adaptive row search to sum over the columns indicated for each row, then sort all the row sums in sequential order, this phase contains only a map function~\cite{lin2015parallel}. This algorithm proved to have a better performance in the quantitative characteristics of each cluster compared to other algorithms such as BIMAX.
+
+On the other hand, Ardaneswari \textit{et al.} propose a method of grouping in two phases to be able to determine a bicluster~\cite{ardaneswari2017implementation}. During the first step, the parallel algorithm k-means is used to classify a matrix $ W_{m\times n}$. In the second phase, the algorithm proposed by Cheng \& Church is used. Also, the benefits and limitations related to the design of a parallel biclustering algorithm in GPUs are presented in~\cite{orzechowski2015effective}. This paper proposes the minimization of latency using a coarse grain to maximize energy efficiency and performance through the use of parallel patterns.
+
+Sarazin \textit{et al.} in~\cite{sarazin2014biclustering} propose an implementation of the algorithm self-organizing maps using MapReduce with the Spark platform. This application is focused on fault correction, information management and distribution in a distributed architecture. The main idea is based on the initiation of two functions of map-reduce type, which manage the iterations between the rows and the columns.
+
+A parallel algorithm of biclustering must be robust, that is, it must show relevant results in a reasonable amount of time, and that must also be scalable to the target architecture. In the following section, we describe the BIMAX: Binary Inclusion-MAXimal algorithm sequential, which assumes two possible levels of expression: level change, and no difference, concerning a control experiment.
+
+\section{BIMAX: Binary Inclusion-MAXimal}\label{sc.4}
+
+Heuristics are used to solve problems that have proved to be \textit{NP-complete}. The advantages of one algorithm over another may be due to a more suitable optimization method for a specific dataset. In this sense, for the choice of BIMAX, the number of references within the scientific community and the facility to reconstruct the code based on the original publication were considered.
+
+BIMAX algorithm uses a search strategy based on ``\textit{divide and conquer}'' to determine all optimum maximal biclusters within a reasonable time of a matrix of binary gene expression. Each gene in a condition assumes two possible values: 1 if the gene responds differentially to a condition and 0 if it does not concern a control condition~\cite{prelic2006systematic}.
+
+Let  $G=\{g_1, g_2, \cdots, g_n\}$ and $C=\{c_1, c_2, \cdots, c_m\}$ be the sets of genes and conditions. 
+
+Find a gene $g_i\in G$, such that the following two condition subsets $B_{i0}$, $B_{i1}$ are non-empty,  where for each $k\in\{0,1\}$ $B_{ik}$ consists of the conditions $c_j\in C$ such that $w_{ij}=k$. 
+
+Let $W_{GB_{i0}}$ and $W_{GB_{i1}}$ be the submatrices whose columns are indexed by these sets.  
+
+Let us partition the gene (row) index set into three subsets:
+\begin{eqnarray*}
+ G_{i0} &=& \{g_{i'}\in G|\ \mbox{\begin{minipage}[t]{.3\textwidth}
+ the restriction of the the $i'$-th row of $W_{GB_{ik}}$ is constant with value $k$, for some $k\in\{0,1\}$
+ $\}$
+\end{minipage}} \\ 
+ G_{i1} &=& \{g_{i'}\in G|\ \mbox{\begin{minipage}[t]{.3\textwidth}
+ the restriction of the the $i'$-th row of $W_{GB_{ik}}$ is constant with value $1-k$, for some $k\in\{0,1\}$
+ $\}$
+\end{minipage}} \\ 
+ G_{i2} &=& G-(G_{i0} \cup G_{i1} )
+\end{eqnarray*}
+and let $F_{i1} = G \setminus  G_{i1}$ be its complement in the gene index set. Form the submatrices
+$$W_{0} = W_{GB_{i1}} \ \  , \ \   W_{1} = W_{F_{i1}C}.$$
+Repeat the procedure to each of these biclusterings, $W_0$ and $W_1$, till the above activation non-emptyness condition fails.
+
+\subsection{Algorithm (Reference method)}
+
+\textit{Algorithm} The following algorithm realizes the divide-and-conquer strategy. Note that individual operations are required for processing the $W_{FB}$ submatrices. The algorithm needs to guarantee that only optimal, i.e., inclusion-maximal biclusters are generated ~\cite{prelic2006systematic}. 
+
+\begin{algorithm}
+\begin{algorithmic}[1]
+\REQUIRE $W_{m,n}$
+\ENSURE $W_{FB}$
+\STATE{$Z=0$}
+\STATE{$W_{FB}=$conquer$(W_{m,n},(\{G\}, \{C\}), Z))$}
+\caption{Procedure Bimax}\label{alg:BIMAX}
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\begin{algorithmic}[1]
+\REQUIRE $W_{m,n}, (\{G\}, \{C\}), Z$
+\ENSURE $(\{G\}, \{C\})$
+\IF{$\forall\ i \in G, j \in C: w_{ij}=1$}
+\RETURN{$(\{G\}, \{C\})$}
+\ENDIF
+\STATE{$(G_{i1},G_{i2},G_{i3}, B_{ik}) =$ divide$(W_{m,n}, (\{G\}, \{C\}), Z)$}
+\STATE{$W_0 = 0, W_1 = 0$}
+\IF{$G_{i1} \neq 0$}
+\STATE{$W_0$=conquer$(W_{m,n}, (\{G_{i1} \cup G_{i2}\},\{B_{i1}\}),Z)$}
+\ENDIF
+\IF{$G_{i3} \neq 0 \wedge G_{i2}  = 0$}
+\STATE{$W_1=$conquer$(W_{m,n}, (\{G_{i3}\}, \{B_{i0}\}), Z)$}
+\ELSIF{$G_{i2} \neq 0$}
+\STATE{$Z'=Z  \cup \{B_{i0} \}$}
+\STATE{$W_1 =$ conquer$(W_{m\times n}, (\{G_{i2}  \cup G_{i3}\} , \{ B_{i0} \cup B_{i1}\}), Z')$}
+\ENDIF
+\RETURN{$(W_0 \cup W_1)$}
+\caption{Procedure Conquer}\label{alg:Conquer}
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\begin{algorithmic}[1]
+\REQUIRE $W_{m,n}, (\{G\}, \{C\}), Z$
+\ENSURE $G_{i1},G_{i2},G_{i3}, B_{ik}$
+\STATE{$G'=$reduce$(W_{m, n}, (\{G\}, \{C\}), Z)$}
+\STATE{Choose $i \in G'$ with $0 < \sum_{j\in C} w_{ij} < |C|$}
+\IF{$i \in G'$}
+\STATE{$B_{i1} = {j | j \in C \wedge w_{ij} = 1}$}
+\ELSE
+\STATE{$B_{i1} = C$}
+\ENDIF
+\STATE{$B_{i0}= C \setminus B_{i1}$}
+\STATE{$G_{i1}=0,G_{i2}=0,G_{i3}=0$}
+\FOR{$i \in G'$}
+\STATE{$C^{*}= \{j | j \in C \wedge w_{ij} = 1\}$}
+\IF{$C^{*} \subseteq B_{i1}$}
+\STATE{$G_{i1} = G_{i1} \cup \{i\}$}
+\ELSIF{$C^{*} \subseteq B_{i0}$}
+\STATE{$G_{i2} = G_{i2} \cup \{i\}$}
+\ELSE
+\STATE{$G_{i3}= G_{i3} \cup \{i\}$}
+\ENDIF
+\ENDFOR
+\RETURN $(G_{i1},G_{i2},G_{i3}, B_{ik})$
+\caption{Procedure Divide}\label{alg:Divide}
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\begin{algorithmic}[1]
+\REQUIRE $W_{m\times n}, (\{G\}, \{C\}), Z$
+\ENSURE $G'$
+\STATE{$G' = 0$}
+\FOR{$i \in G$}
+\STATE{$C^{*}=\{j|j \in C \wedge w_{i,j}=1\}$}
+\IF{$C^{*} \neq 0 \wedge \forall\ C \in Z: C \cap C^{*} \neq 0$}
+\STATE{$G'=G' \cup \{i\}$}
+\ENDIF
+\ENDFOR
+\RETURN $G'$
+\caption{Procedure Reduce}\label{alg:Reduce}
+\end{algorithmic}
+\end{algorithm}
+
+\section{Strategies for parallelizing BIMAX}
+The parallelization of biclustering algorithms has been difficult due to its inherent characteristics, which requires to repetitively read the same data or to distribute it between different devices. These data intensive characteristics can limit current parallel architectures.
+Nevertheless, some biclustering algorithms have been parallelized including novel algorithms using parallel genetic algorithms, parallel evolutionary learning and the parallel large average submatrices based on MapReduce \cite{WeiShen2011}, \cite{Huang2012} \cite{lin2015parallel}, running on multicore systems or clusters. Others algorithms have been parallelized for using the popular graphics processing units (GPUs), requiring more specialized parallel programming as \cite{orzechowski2015effective}. Despite the Bimax algorithm has been taken as a baseline for comparison with other biclustering algorithms, the only parallel version, to the best of our knowledge, is the one presented by Voggenreiter et al. \cite{voggenreiter2014biclustering}. This parallelisation consists of a straightforward strategy using a job pool of threads. \cite{voggenreiter2014biclustering} states that using a single pool, leads to contention between threads and it increases as the number of threads gets higher. Thus, the more number of threads running the \textit{Bimax}, the slower performance the program have. To alleviate this contention, it is proposed a parallelization of Bimax without a job pool. However, this implementation was found not to be effective for larger datasets. 
+
+In this work, we aim to go further in the \textit{bimax} parallelization by partitioning the input matrix up to a certain level. This level is limited by the number of processors in the architecture system. After reaching the last level, then the bimax is executed independently by each process with a submatrix. The program ends when all the processes have been finished. 
+
+Figure \ref{fig:parbimax} illustrates the proposed paralellization of the bimax algorithm. It basically consists of the division of the input matrix into the total number of available processors in the system. This division is made at the beginning by the parallel bimax program. Since the bimax is implemented in divide and conquer approach, it generates a tree of processes as it can be seen in Figure \ref{fig:parbimax}. The number of levels in that tree depends on the total number of processors. For instance, having available six processors, the tree can only have two levels of the bimax recursion. Once the last level of tree is achieved, in this case the second level, each processor start the execution of the bimax algorithm with its respective input matrix. 
+
+\begin{figure}[ht!]
+  \includegraphics[width=\linewidth]{./img/bimax.pdf}
+  \caption{Example of the partitioning of the input matrix created by bimax algorithm.}
+  \label{fig:parbimax}
+\end{figure}
+
+
+%is straightforward and consists of 
+%
+%1.- paralelizacion de algoritmos de biclustering
+%2.- desarrollos recientes sobre arquitecturas heterogeneas
+%2.- mencionar la thesis para el bimax
+%
+%
+%
+%Despite not many parallel biclustering algoritms have been developed so far [][][][]. 
+
+
+
+\section{Platform architecture and results}
+
+\section{Conclusion}
+
+\section{Acknowledgement}
+
+\bibliography{bibliografia}
+\bibliographystyle{IEEEtran}
+
+\balance 
+\end{document}
