@@ -14,7 +14,7 @@
 #define VERSION    "1.0.0"
 
 /*Funcion que lee los parámetros de entrada*/
-int ReadParameters(int, char **, char *, char *, int *, int *);
+int ReadParameters(int, char **, char *, char *, int *, int *, int *);
 
 /* Función que imprime la ayuda del programa*/
 void PrintHelp(int);

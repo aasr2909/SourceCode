@@ -33,7 +33,7 @@ void unsetColumn(int *, int, int);
 void readExpressionMatrix(int, int, int **, int);
 
 /*Función conquer*/
-void conquer(int **, int, int, int, int, int, int, int, int, int, int, FILE *);
+void conquer(int **, int, int, int, int, int, int, int, int, int, int, FILE *, int);
 
 /*Escribe un bicluster en pantalla*/
 void printBicluster(int **, int ,int, int *, int, int, int);
@@ -48,7 +48,7 @@ int selectRows(int, int, int, int *, int, int, int);
 int DivideRow(int, int, int, int);
 
 /*Intercambia las filas de la estructura*/
-void swapRows(int, int, int, int);
+void swapRows(int, int, int);
 
 /*Contiene las columnas obligatorias*/
 int containsColumns(int *, int, int);
@@ -69,9 +69,8 @@ void intersectColumnSets(int *, int *, int *, int);
 int isSet(int * , int, int);
 
 /*Determina columnas en común*/
-void determineColumnsInCommon(int, int, int *, int);
+void determineColumnsInCommon(int, int, int *, int, int, int);
 
 /*Algoritmo Bimax*/
-int Bimax(int **,int, int, int, int, char*);
-
+int Bimax(int **,int, int, int, int, char*, int);
 #endif  //BIMAX_H

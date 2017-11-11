@@ -7,7 +7,7 @@
 void PrintHelp(int exval)
 {
     printf("%s,%s show working \n", PACKAGE, VERSION);
-    printf("%s [-h] [-V] [-G FILE] [-r NUMBER] [-c NUMBER] [-o FILE] [-w] \n\n", PACKAGE);
+    printf("%s [-h] [-V] [-G FILE] [-r NUMBER] [-c NUMBER] [-p option]  [-o FILE] [-w] \n\n", PACKAGE);
 
     printf("  -h              print this help and exit\n");
     printf("  -V              print version and exit\n\n");
@@ -15,7 +15,7 @@ void PrintHelp(int exval)
     printf("  -G              set Gene Expression Matrix file\n");
     printf("  -r              set the minimum numbers of rows (default 1)\n");
     printf("  -c              set the minimum numbers of cols (default 1)\n");
-
+    printf("  -p {1,2,3}       set type of write (1: console, 2: file, 3: both, default 2)\n");
     printf("  -o FILE         set output biclusters file (default Biclusters.txt)\n");
 
     printf("\n\n");
@@ -23,7 +23,7 @@ void PrintHelp(int exval)
 }
 
 /*Funcion que lee los parámetros de entrada*/
-int ReadParameters(int argc, char **argv, char *FileName, char *Output, int *minRows, int *minCols)
+int ReadParameters(int argc, char **argv, char *FileName, char *Output, int *minRows, int *minCols, int *type)
 {
     /*Almacena la opcion*/
     int opt;
@@ -38,7 +38,7 @@ int ReadParameters(int argc, char **argv, char *FileName, char *Output, int *min
     }
 
     /*Mientras se reciban parametros*/
-    while((opt = getopt(argc, argv, "hVG:r:c:o:s:")) != -1)
+    while((opt = getopt(argc, argv, "hVG:r:c:o:s:p:")) != -1)
     {
         switch(opt)
         {
@@ -71,6 +71,11 @@ int ReadParameters(int argc, char **argv, char *FileName, char *Output, int *min
             /*Selelcciona el nombre del archivo de salida*/
             printf("Output: Filename output %s\n", optarg);
             strcpy(Output,optarg);
+            break;
+        case 'p':
+            /*Selelcciona el tipo de salida*/
+            printf("Output type %s\n", optarg);
+            *type=atoi(optarg);
             break;
         case ':':
             fprintf(stderr, "%s: Error - Option `%c' needs a value\n\n", PACKAGE, optopt);
