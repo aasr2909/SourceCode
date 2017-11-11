@@ -1,4 +1,6 @@
-/*Bimax Angélica Alejandra Serrano Rubio*/
+/*Bimax Angélica Alejandra Serrano Rubio
+Eckart Zitzler, ETH Zurich, Switzerland
+*/
 
 /*Declaración de bibliotecas*/
 #include "bimax.h"

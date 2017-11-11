@@ -1,4 +1,6 @@
-/*Bimax Angélica Alejandra Serrano Rubio*/
+/*Bimax Angélica Alejandra Serrano Rubio
+Eckart Zitzler, ETH Zurich, Switzerland
+*/
 
 #ifndef BIMAX_H
 #define BIMAX_H
